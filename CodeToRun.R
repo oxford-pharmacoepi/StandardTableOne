@@ -1,15 +1,16 @@
-# ADD NECESSARY PACKAGES
-
-library(CDMConnector)
-library(DBI)
+library(CDMConnector) # At least 1.0.0
 library(log4r)
+library(DBI)
 library(dplyr)
 library(dbplyr)
 library(here)
+library(CodelistGenerator) # At least 1.6.0
+library(DrugUtilisation) # At least 0.3.0
+library(PatientProfiles) # At least 0.3.0
 
 # database metadata and connection details -----
 # The name/ acronym for the database
-db_name <- "...."
+db_name <- "pharmetrics_100k"
 
 # Set output folder location -----
 # the path to a folder where the results from this analysis will be saved
@@ -33,13 +34,24 @@ if (!dir.exists(output_folder)) {
 #   user = user,
 #   password = password
 # )
-db <- dbConnect("....")
+server_dbi<-"cdm_iqvia_pharmetrics_plus_202203"
+port<-Sys.getenv("DB_PORT")
+host<-Sys.getenv("DB_HOST")
+user<-Sys.getenv("DB_USER")
+password<-Sys.getenv("DB_PASSWORD")
+
+db <- dbConnect(RPostgres::Postgres(),
+                dbname = server_dbi,
+                port = port,
+                host = host,
+                user = user,
+                password = password)
 
 # The name of the schema that contains the OMOP CDM with patient-level data
-cdm_database_schema <- "...."
+cdm_database_schema <- "public_100k"
 
 # The name of the schema where results tables will be created 
-results_database_schema <- "...."
+results_database_schema <- "results"
 
 # Name of stem outcome table in the result schema where the outcome cohorts will
 # be stored. 
@@ -48,7 +60,7 @@ results_database_schema <- "...."
 #   will be overwritten
 # - more than one cohort will be created
 # - name must be lower case
-stem_table <- "...."
+#stem_table <- "mc_"
 
 # minimum counts that can be displayed according to data governance
 minimum_counts <- 5
@@ -57,7 +69,8 @@ minimum_counts <- 5
 cdm <- CDMConnector::cdm_from_con(
   con = db,
   cdm_schema = cdm_database_schema,
-  write_schema = results_database_schema
+  write_schema = c(schema = results_database_schema),
+  cdm_name = db_name
 )
 # check database connection
 # running the next line should give you a count of your person table
@@ -66,8 +79,3 @@ cdm$person %>%
 
 # Run the study ------
 source(here("RunAnalysis.R"))
-# after the study is run you should have a zip folder in your output folder to share
-
-print("Done!")
-print("-- If all has worked, there should now be a zip folder with your results in the output folder to share")
-print("-- Thank you for running the study!")

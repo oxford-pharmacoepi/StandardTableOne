@@ -4,31 +4,37 @@ logger <- create.logger()
 logfile(logger) <- log_file
 level(logger) <- "INFO"
 
-# generate table names
-info(logger, "GENERATE TABLE NAMES")
-cohortTableName <- paste0(stem_table, "_cohorts_to_instantiate")
-
 # instantiate necessary cohorts
-info(logger, "INSTANTIATE COHORTS")
+info(logger, "INSTANTIATE TARGET COHORTS")
 cohortSet <- readCohortSet(
-  path = here("1_InstantiateCohorts", "Cohorts")
+  path = here("Cohorts", "CohortToCharacterise")
 )
 cdm <- generateCohortSet(
-  cdm = cdm,
-  cohortSet = cohortSet,
-  cohortTableName = cohortTableName,
+  cdm = cdm, cohortSet = cohortSet, name = "target",
   overwrite = TRUE
 )
 
-study_results <- list()
+# subset the cdm to only individuals in target cohort
+info(logger, "SUBSETTING CDM")
+cdm <- cdmSubsetCohort(cdm, "target")
 
-info(logger, "WRITING CSV FILES")
-lapply(names(study_results), function(x) {
-  result <- study_results[[x]]
-  utils::write.csv(
-    result, file = paste0(output_folder, "/", x, ".csv"), row.names = FALSE
-  )
-})
+# instantiate medications
+info(logger, "INSTANTIATE MEDICATIONS")
+codelistMedications <- codesFromConceptSet(here("Cohorts", "Medications"), cdm)
+cdm <- generateConceptCohortSet(cdm, "medications", codelistMedications)
+
+# instantiate conditions
+info(logger, "INSTANTIATE CONDITIONS")
+codelistMedications <- codesFromConceptSet(here("Cohorts", "Medications"), cdm)
+cdm <- generateConceptCohortSet(cdm, "medications", codelistMedications)
+
+# create table summary
+
+
+# export results
+
+
+# create zip file
 info(logger, "ZIPPING RESULTS")
 output_folder <- basename(output_folder)
 zip(

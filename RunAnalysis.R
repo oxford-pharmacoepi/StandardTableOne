@@ -34,7 +34,7 @@ cdm <- generateConceptCohortSet(cdm, conditions, codelistConditions)
 
 # create table summary
 info(logger, "CREATE SUMMARY")
-result <- cdm$target %>%
+result <- cdm[[target]] %>%
   summariseCharacteristics(
     ageGroup = list(c(0, 19), c(20, 39), c(40, 59), c(60, 79), c(80, 150)),
     tableIntersect = list(

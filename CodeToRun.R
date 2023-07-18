@@ -7,6 +7,7 @@ library(here)
 library(CodelistGenerator) # At least 1.6.0
 library(DrugUtilisation) # At least 0.3.0
 library(PatientProfiles) # At least 0.3.0
+library(readr)
 
 # database metadata and connection details -----
 # The name/ acronym for the database

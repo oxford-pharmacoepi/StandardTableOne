@@ -61,7 +61,7 @@ results_database_schema <- "results"
 #   will be overwritten
 # - more than one cohort will be created
 # - name must be lower case
-#stem_table <- "mc_"
+stem_table <- "mc_"
 
 # minimum counts that can be displayed according to data governance
 minimum_counts <- 5

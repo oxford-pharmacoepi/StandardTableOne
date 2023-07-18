@@ -4,29 +4,33 @@ logger <- create.logger()
 logfile(logger) <- log_file
 level(logger) <- "INFO"
 
+target <- paste0(stem_table, "target")
+conditions <- paste0(stem_table, "conditions")
+medications <- paste0(stem_table, "medications")
+
 # instantiate necessary cohorts
 info(logger, "INSTANTIATE TARGET COHORTS")
 cohortSet <- readCohortSet(
   path = here("Cohorts", "CohortToCharacterise")
 )
 cdm <- generateCohortSet(
-  cdm = cdm, cohortSet = cohortSet, name = "target",
+  cdm = cdm, cohortSet = cohortSet, name = target,
   overwrite = TRUE
 )
 
 # subset the cdm to only individuals in target cohort
 info(logger, "SUBSETTING CDM")
-cdm <- cdmSubsetCohort(cdm, "target")
+cdm <- cdmSubsetCohort(cdm, target)
 
 # instantiate medications
 info(logger, "INSTANTIATE MEDICATIONS")
 codelistMedications <- codesFromConceptSet(here("Cohorts", "Medications"), cdm)
-cdm <- generateConceptCohortSet(cdm, "medications", codelistMedications)
+cdm <- generateConceptCohortSet(cdm, medications, codelistMedications)
 
 # instantiate conditions
 info(logger, "INSTANTIATE CONDITIONS")
 codelistConditions <- codesFromConceptSet(here("Cohorts", "Conditions"), cdm)
-cdm <- generateConceptCohortSet(cdm, "conditions", codelistConditions)
+cdm <- generateConceptCohortSet(cdm, conditions, codelistConditions)
 
 # create table summary
 info(logger, "CREATE SUMMARY")
@@ -40,10 +44,10 @@ result <- cdm$target %>%
     ),
     cohortIntersect = list(
       "Medications" = list(
-        targetCohortTable = "medications", value = "flag", window = c(-365, 0)
+        targetCohortTable = medications, value = "flag", window = c(-365, 0)
       ),
       "Conditions" = list(
-        targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)
+        targetCohortTable = conditions, value = "flag", window = c(-Inf, 0)
       )
     )
   )
